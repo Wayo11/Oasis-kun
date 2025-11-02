@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Oasis kun</title>
+  <title>Oasis Chat</title>
   <style>
     :root{
       /* Desert & water palette */
@@ -23,7 +23,7 @@
     /* App shell */
     .app{height:100dvh;display:grid;grid-template-rows:auto 1fr auto;max-width:760px;margin:0 auto;border-left:1px solid #e5e5e5;border-right:1px solid #e5e5e5;background:linear-gradient(180deg, #f7f1e0 0%, #f3ead2 100%)}
     .topbar{background:linear-gradient(90deg,var(--oasis-dark),var(--oasis));color:#fff;padding:12px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2}
-    .avatar{width:60px;height:60px;border-radius:50%;background:#fff1;border:2px solid #ffffff44}
+    .avatar{width:36px;height:36px;border-radius:50%;background:#fff1;border:2px solid #ffffff44}
     .title{font-weight:700}
     .status{font-size:12px;opacity:.95}
 
@@ -55,12 +55,6 @@
     .splash-sub{color:#4b5563;font-size:14px;max-width:22em}
     .splash-btn{position:relative;overflow:hidden;isolation:isolate;background:var(--oasis-dark);color:#fff;border:none;border-radius:999px;padding:12px 20px;font-weight:800;cursor:pointer;transition:transform .06s ease}
     .splash-btn:active{transform:translateY(1px)}
-    .splash-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;  /* ← 丸いっぱいに拡大・中央トリミング */
-      border-radius: 50%; /* ← 丸の中に収める */
-    }
     /* Ripple effect */
     .ripple{position:absolute;border-radius:50%;transform:scale(0);opacity:.6;background:#fff;animation:ripple .6s ease-out forwards;pointer-events:none}
     @keyframes ripple{to{transform:scale(4);opacity:0}}
@@ -73,20 +67,28 @@
   <div class="splash" id="splash">
     <div class="splash-card">
       <div class="splash-icon">
-        <img src="Oasis-icon.png" alt="Oasis-kun" width="64" height="64"/>
+        <img src="https://api.iconify.design/mdi:water-opacity.svg" alt="Oasis-kun"/>
       </div>
-      <div class="splash-title">Meet Oasis‑kun</div>
-      <div class="splash-sub">A friendly local desert fairy who knows water by heart. Tap to begin your conversation.</div>
+      <div class="splash-title" id="splashTitle">Meet Oasis‑kun</div>
+      <div class="splash-sub" id="splashSub">A friendly local desert fairy who knows water by heart. Tap to begin your conversation.</div>
       <button id="startBtn" class="splash-btn">Start conversation</button>
     </div>
   </div>
 
   <div class="app hidden" id="app">
     <header class="topbar">
-      <img class="avatar" alt="Oasis-kun" src="Oasis-icon.png"/>
+      <img class="avatar" alt="Oasis-kun" src="https://api.iconify.design/mdi:water.svg?color=white"/>
       <div>
         <div class="title">Oasis‑kun</div>
         <div class="status" id="status">Online</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <label for="langSel" style="font-size:12px;opacity:.9">Language</label>
+        <select id="langSel" style="appearance:none;border:1px solid #ffffff66;background:#ffffff22;color:#000000;padding:6px 10px;border-radius:999px;backdrop-filter:blur(3px)">
+          <option value="en">English</option>
+          <option value="ja">日本語</option>
+          <option value="ar">العربية</option>
+        </select>
       </div>
     </header>
 
@@ -100,7 +102,46 @@
 
   <script>
     // === Configure ===
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxV7XFy-FziEH6vpzjQXFNi_iZGCg96jth8OX2giSBfIaKbpj-Sr4i2pvlp8pEiDl0/exec"
+    const GAS_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE"; // Insert your Apps Script Web App URL
+
+    // === i18n ===
+    const I18N = {
+      en: {
+        splashTitle: 'Meet Oasis‑kun',
+        splashSub: 'A friendly local desert fairy who knows water by heart. Tap to begin your conversation.',
+        start: 'Start conversation',
+        welcome: "Salām, my friend. I'm Oasis‑kun. Ask me anything about water, farming, or village life.",
+        online: 'Online',
+        typing: 'Oasis‑kun is typing…',
+        placeholder: 'Type a message',
+        send: 'Send',
+        answerIn: 'Please answer in English.'
+      },
+      ja: {
+        splashTitle: 'オアシス君に会おう',
+        splashSub: '水に詳しい砂漠の妖精。下のボタンで会話を始めよう。',
+        start: '会話を始める',
+        welcome: 'サラーム、友よ。僕はオアシス君。水・農業・村の暮らし、何でも聞いてね。',
+        online: 'オンライン',
+        typing: 'オアシス君が入力中…',
+        placeholder: 'メッセージを入力',
+        send: '送信',
+        answerIn: 'Please answer in Japanese.'
+      },
+      ar: {
+        splashTitle: 'تعرّف على أويسِس‑كون',
+        splashSub: 'جنيٌّ محلي من الصحراء خبيرٌ بالماء. اضغط لبدء المحادثة.',
+        start: 'ابدأ المحادثة',
+        welcome: 'سلام يا صديقي. أنا أويسِس‑كون. اسألني عن الماء أو الزراعة أو حياة القرية.',
+        online: 'متصل',
+        typing: 'أويسِس‑كون يكتب…',
+        placeholder: 'اكتب رسالة',
+        send: 'إرسال',
+        answerIn: 'Please answer in Arabic.'
+      }
+    };
+    let currentLang = 'en';
+
     // === Elements ===
     const splash = document.getElementById('splash');
     const startBtn = document.getElementById('startBtn');
@@ -122,7 +163,7 @@
     function typingBubble(){
       const b=document.createElement('div'); b.className='bubble you';
       b.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`+
-                    `<div class="meta"><span>Oasis‑kun is typing…</span></div>`;
+                    `<div class=\"meta\"><span>${I18N[currentLang].typing}</span></div>`;
       chat.appendChild(b); chat.scrollTop = chat.scrollHeight; return b;
     }
 
@@ -131,15 +172,16 @@
     async function send(){
       const text = input.value.trim(); if(!text) return;
       sendBtn.disabled = true; bubble(text,'me'); input.value=''; input.style.height='';
-      const typing = typingBubble(); statusEl.textContent = 'Oasis‑kun is typing…';
+      const typing = typingBubble(); statusEl.textContent = I18N[currentLang].typing;
       try{
-        const res = await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({message:text})});
+        const langHint = I18N[currentLang].answerIn;
+        const res = await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({message: `${langHint}\n\n${text}`, lang: currentLang})});
         if(!res.ok){throw new Error('HTTP '+res.status)}
         const data = await res.json();
         const reply = data.reply || data.output_text || '';
         typing.remove(); bubble(reply || '(no reply)', 'you');
       }catch(err){typing.remove(); bubble('Error: '+err.message,'you')}
-      finally{sendBtn.disabled=false; statusEl.textContent='Online'}
+      finally{sendBtn.disabled=false; statusEl.textContent=I18N[currentLang].online}
     }
 
     sendBtn.addEventListener('click', send);
@@ -148,10 +190,9 @@
 
     // Splash → App
     function startConversation(){
-      // Initial welcome message
       app.classList.remove('hidden');
       splash.classList.add('hidden');
-      bubble("Salām, my friend. I'm Oasis‑kun. Ask me anything about water, farming, or village life.", 'you');
+      bubble(I18N[currentLang].welcome, 'you');
     }
 
     // Ripple effect on button + start
@@ -174,6 +215,30 @@
       if(!app.classList.contains('hidden')) return;
       if(e.key==='Enter'){ startConversation(); }
     });
+
+    // Language setup
+    const langSel = document.getElementById('langSel');
+    const splashTitle = document.getElementById('splashTitle');
+    const splashSub = document.getElementById('splashSub');
+
+    function setLang(lang){
+      currentLang = lang in I18N ? lang : 'en';
+      const t = I18N[currentLang];
+      // UI text
+      splashTitle.textContent = t.splashTitle;
+      splashSub.textContent = t.splashSub;
+      startBtn.textContent = t.start;
+      statusEl.textContent = t.online;
+      input.placeholder = t.placeholder;
+      sendBtn.textContent = t.send;
+      // Direction
+      document.documentElement.setAttribute('lang', currentLang);
+      document.documentElement.dir = (currentLang==='ar') ? 'rtl' : 'ltr';
+    }
+
+    langSel.addEventListener('change', ()=> setLang(langSel.value));
+    // init
+    setLang('en');
   </script>
 </body>
 </html>
